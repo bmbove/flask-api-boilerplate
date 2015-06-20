@@ -1,6 +1,6 @@
-from app import db, api
+from app import db
 from flask import Blueprint
-from flask_restful import Resource
+from flask_restful import Resource, Api
 
 from flask.ext.restful import fields
 from flask.ext.restful import marshal_with
@@ -9,7 +9,8 @@ from flask.ext.restful import reqparse
 
 from app.blog.models import BlogPost as Post
 
-blog_bp = Blueprint('api', __name__)
+blog_bp = Blueprint('blog_api', __name__)
+api = Api(blog_bp)
 
 post_fields = {
     'id': fields.Integer,
@@ -71,5 +72,5 @@ class BlogPostList(Resource):
         return post, 201
 
 
-api.add_resource(BlogPostDetail, '/blog/<int:id>')
-api.add_resource(BlogPostList, '/blog/')
+api.add_resource(BlogPostDetail, '/<int:id>')
+api.add_resource(BlogPostList, '/')

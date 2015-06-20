@@ -4,10 +4,9 @@ from flask_restful import Api
 from flask.ext.restful import abort
 
 app = flask.Flask(__name__)
-
 app.config.from_object('config')
 db = SQLAlchemy(app)
-api = Api(app)
+#api = Api(app)
 
 @app.errorhandler(404)
 def not_found(error):
@@ -16,7 +15,12 @@ def not_found(error):
 
 
 from app.blog.resources import blog_bp
-app.register_blueprint(blog_bp)
+
+app.register_blueprint(
+    blog_bp,
+    url_prefix='/blog'
+)
+
 
 db.create_all()
 

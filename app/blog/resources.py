@@ -1,13 +1,9 @@
-from app import db
-from app.base.decorators import login_required, has_permissions
 from flask import Blueprint, g
-from flask_restful import Resource, Api
 
-from flask.ext.restful import fields
-from flask.ext.restful import marshal_with
-from flask.ext.restful import abort
-from flask.ext.restful import reqparse
+from flask_restful import Api, Resource 
+from flask.ext.restful import abort, fields, marshal_with, reqparse
 
+from app.base.decorators import login_required, has_permissions
 from app.blog.models import BlogPost as Post
 
 blog_bp = Blueprint('blog_api', __name__)
@@ -30,8 +26,6 @@ parser.add_argument('content', type=str)
 class BlogPostDetail(Resource):
 
     @marshal_with(post_fields)
-    @login_required
-    @has_permissions(['can_access'])
     def get(self, id):
         post = Post.query.filter_by(id=id).first()
         if not post:
@@ -39,6 +33,7 @@ class BlogPostDetail(Resource):
         return post
 
     @login_required
+    @has_permissions(['blog_can_edit'])
     def delete(self, id):
         post = Post.query.filter_by(id=id).first()
         if not post:
@@ -49,6 +44,7 @@ class BlogPostDetail(Resource):
 
     @marshal_with(post_fields)
     @login_required
+    @has_permissions(['blog_can_edit'])
     def put(self, id):
         parsed_args = parser.parse_args()
         post = Post.query.filter_by(id=id).first()
@@ -70,6 +66,7 @@ class BlogPostList(Resource):
 
     @marshal_with(post_fields)
     @login_required
+    @has_permissions(['blog_can_post'])
     def post(self):
         parsed_args = parser.parse_args()
         post = Post(title=parsed_args['title'], content=parsed_args['content'])

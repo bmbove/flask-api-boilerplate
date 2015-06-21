@@ -5,8 +5,6 @@ from passlib.hash import pbkdf2_sha256
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
-
-
 assoc = db.Table(
     'auth_perm_assoc',
     db.Model.metadata,

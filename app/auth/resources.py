@@ -1,26 +1,21 @@
+from flask import Blueprint, g
+
+from flask_restful import Api, Resource 
+from flask.ext.restful import abort, fields, marshal_with, reqparse
+
 from app import db
-from flask import Blueprint
-from flask_restful import Resource, Api
-
+from app.auth.models import Permission, User
 from app.base.decorators import login_required
-
-from flask.ext.restful import fields
-from flask.ext.restful import marshal_with
-from flask.ext.restful import abort
-from flask.ext.restful import reqparse
-
-from app.auth.models import User, Permission
 
 auth_bp = Blueprint('auth_api', __name__)
 api = Api(auth_bp)
-
 
 perm_fields = {
     'name': fields.String,
     'code': fields.String,
 }
 
-include = {
+user_fields = {
     'id': fields.Integer,
     'created': fields.DateTime,
     'modified': fields.DateTime,
@@ -29,24 +24,10 @@ include = {
     'permissions': fields.Nested(perm_fields),
 }
 
-token_inc= {
+token_fields = {
     'token': fields.String,
 }
 
-
-parser = reqparse.RequestParser()
-parser.add_argument('username', type=str)
-parser.add_argument('password', type=str)
-parser.add_argument('permissions', type=str, action='append')
-
-put_parser = reqparse.RequestParser()
-put_parser.add_argument('cur_password', type=str)
-put_parser.add_argument('new_password', type=str)
-put_parser.add_argument('permissions', type=str, action='append')
-
-token_parser = reqparse.RequestParser()
-token_parser.add_argument('username', type=str)
-token_parser.add_argument('password', type=str)
 
 class UserBase(Resource):
 
@@ -65,7 +46,12 @@ class UserBase(Resource):
 
 class UserDetail(UserBase):
 
-    @marshal_with(include)
+    put_parser = reqparse.RequestParser()
+    put_parser.add_argument('cur_password', type=str)
+    put_parser.add_argument('new_password', type=str)
+    put_parser.add_argument('permissions', type=str, action='append')
+
+    @marshal_with(user_fields)
     @login_required
     def get(self, username):
         user = self.get_user(username)
@@ -78,10 +64,10 @@ class UserDetail(UserBase):
         db.session.commit()
         return {}, 204
 
-    @marshal_with(include)
+    @marshal_with(user_fields)
     @login_required
     def put(self, username):
-        args = put_parser.parse_args()
+        args = self.put_parser.parse_args()
         user = self.get_user(username)
         # Update password if current one matches
         if None not in [args['cur_password'], args['new_password']]:
@@ -98,15 +84,20 @@ class UserDetail(UserBase):
 
 class UserList(UserBase):
 
-    @marshal_with(include)
+    parser = reqparse.RequestParser()
+    parser.add_argument('username', type=str)
+    parser.add_argument('password', type=str)
+    parser.add_argument('permissions', type=str, action='append')
+
+    @marshal_with(user_fields)
     @login_required
     def get(self):
         user = User.query.all()
         return user 
 
-    @marshal_with(include)
+    @marshal_with(user_fields)
     def post(self):
-        parsed_args = parser.parse_args()
+        parsed_args = self.parser.parse_args()
         user = User(
             username=parsed_args['username']
         )
@@ -119,9 +110,13 @@ class UserList(UserBase):
 
 class AuthToken(UserBase):
 
-    @marshal_with(token_inc)
+    token_parser = reqparse.RequestParser()
+    token_parser.add_argument('username', type=str)
+    token_parser.add_argument('password', type=str)
+
+    @marshal_with(token_fields)
     def post(self):
-        args = token_parser.parse_args()
+        args = self.token_parser.parse_args()
         user = self.get_user(args['username']) 
         if user.check_password(args['password']):
             token = user.generate_auth_token()

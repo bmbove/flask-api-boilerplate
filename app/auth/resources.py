@@ -2,6 +2,8 @@ from app import db
 from flask import Blueprint
 from flask_restful import Resource, Api
 
+from app.base.decorators import login_required
+
 from flask.ext.restful import fields
 from flask.ext.restful import marshal_with
 from flask.ext.restful import abort

@@ -1,5 +1,5 @@
 from app import db
-from app.base.decorators import login_required
+from app.base.decorators import login_required, has_permissions
 from flask import Blueprint, g
 from flask_restful import Resource, Api
 
@@ -31,6 +31,7 @@ class BlogPostDetail(Resource):
 
     @marshal_with(post_fields)
     @login_required
+    @has_permissions(['can_access'])
     def get(self, id):
         post = Post.query.filter_by(id=id).first()
         if not post:

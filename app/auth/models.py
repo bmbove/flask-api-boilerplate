@@ -52,6 +52,13 @@ class User(Base):
         if p:
             self.permissions.append(p)
 
+    def has_permission(self, perm):
+        p = Permission.query.filter_by(code=perm).first()
+        if p in self.permissions:
+            return True
+        else:
+            return False
+
     def check_password(self, password):
         if password is None:
             return False

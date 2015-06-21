@@ -1,5 +1,6 @@
 from app import db
-from flask import Blueprint
+from app.base.decorators import login_required
+from flask import Blueprint, g
 from flask_restful import Resource, Api
 
 from flask.ext.restful import fields
@@ -29,12 +30,14 @@ parser.add_argument('content', type=str)
 class BlogPostDetail(Resource):
 
     @marshal_with(post_fields)
+    @login_required
     def get(self, id):
         post = Post.query.filter_by(id=id).first()
         if not post:
             abort(404, message="Post {} doesn't exist".format(id))
         return post
 
+    @login_required
     def delete(self, id):
         post = Post.query.filter_by(id=id).first()
         if not post:
@@ -44,6 +47,7 @@ class BlogPostDetail(Resource):
         return {}, 204
 
     @marshal_with(post_fields)
+    @login_required
     def put(self, id):
         parsed_args = parser.parse_args()
         post = Post.query.filter_by(id=id).first()
@@ -64,6 +68,7 @@ class BlogPostList(Resource):
         return post
 
     @marshal_with(post_fields)
+    @login_required
     def post(self):
         parsed_args = parser.parse_args()
         post = Post(title=parsed_args['title'], content=parsed_args['content'])

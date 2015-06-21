@@ -6,7 +6,6 @@ from flask.ext.restful import abort
 app = flask.Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
-#api = Api(app)
 
 @app.errorhandler(404)
 def not_found(error):
@@ -15,10 +14,16 @@ def not_found(error):
 
 
 from app.blog.resources import blog_bp
+from app.auth.resources import auth_bp
 
 app.register_blueprint(
     blog_bp,
     url_prefix='/blog'
+)
+
+app.register_blueprint(
+    auth_bp,
+    url_prefix='/auth'
 )
 
 

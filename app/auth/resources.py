@@ -126,5 +126,5 @@ class AuthToken(UserBase):
 
 
 api.add_resource(AuthToken, '/login/')
-api.add_resource(UserDetail, '/<string:username>')
-api.add_resource(UserList, '/')
+api.add_resource(UserDetail, '/users/<string:username>')
+api.add_resource(UserList, '/users/')

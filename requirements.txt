@@ -1,6 +1,7 @@
 alembic==0.7.6
 aniso8601==1.0.0
 Flask==0.10.1
+Flask-Cors==2.0.1
 Flask-Migrate==1.4.0
 Flask-RESTful==0.3.3
 Flask-Script==2.0.5
